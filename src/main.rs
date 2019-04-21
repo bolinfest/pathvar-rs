@@ -1,10 +1,13 @@
 mod path;
-mod path_elements;
+mod path_var;
 #[cfg(unix)]
-mod path_elements_unix;
+mod path_var_unix;
+#[cfg(windows)]
+mod path_var_windows;
 
 use std::env;
 use std::io::Write;
+use std::path::PathBuf;
 use std::process::exit;
 
 fn main() -> std::io::Result<()> {
@@ -17,7 +20,8 @@ fn main() -> std::io::Result<()> {
         usage();
     }
 
-    let bytes = path::add(&args[2]);
+    let path_arg = PathBuf::from(&args[2]);
+    let bytes = path::add(path_arg.as_path());
     let mut stdout = std::io::stdout();
     stdout.write_all(&bytes)?;
     stdout.flush()?;
