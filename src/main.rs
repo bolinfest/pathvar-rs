@@ -10,22 +10,40 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::exit;
 
+enum Command {
+    Add,
+    Insert,
+    Usage,
+}
+
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() != 3 {
         usage();
     }
-    // TODO: Support other subcommands.
-    if &args[1] != "add" {
-        usage();
-    }
 
     let path_arg = PathBuf::from(&args[2]);
-    let bytes = path::add(path_arg.as_path());
-    let mut stdout = std::io::stdout();
-    stdout.write_all(&bytes)?;
-    stdout.flush()?;
+    match parse_command(&args[1]) {
+        Command::Add => {
+            let bytes = path::add(path_arg.as_path());
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            handle.write_all(&bytes)?;
+            handle.flush()?;
+        }
+        Command::Insert => panic!("TODO"),
+        Command::Usage => usage(),
+    }
+
     Ok(())
+}
+
+fn parse_command(command: &str) -> Command {
+    match command {
+        "add" => Command::Add,
+        "insert" => Command::Insert,
+        _ => Command::Usage,
+    }
 }
 
 fn usage() -> ! {
