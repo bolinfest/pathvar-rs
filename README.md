@@ -19,7 +19,8 @@ longer `PATH` variables under the standard idiom.
 
 ## Installation
 
-Run `cargo install pathvar`, which will add `pathvar` to your `PATH`.
+Run `cargo install pathvar`, which will install `pathvar` on your machine
+(most likely at `~/.cargo/bin/pathvar`).
 
 ## Command: insert
 
