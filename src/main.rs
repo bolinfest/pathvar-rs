@@ -1,11 +1,16 @@
-mod path;
 mod path_var;
 #[cfg(unix)]
 mod path_var_unix;
 #[cfg(windows)]
 mod path_var_windows;
 
+use crate::path_var::PathVar;
+#[cfg(unix)]
+use crate::path_var_unix::split_path_var;
+#[cfg(windows)]
+use crate::path_var_windows::split_path_var;
 use std::env;
+use std::ffi::OsString;
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::exit;
@@ -22,18 +27,25 @@ fn main() -> std::io::Result<()> {
         usage();
     }
 
-    let path_arg = PathBuf::from(&args[2]);
-    match parse_command(&args[1]) {
+    let folder = PathBuf::from(&args[2]);
+    let path_var = match parse_command(&args[1]) {
         Command::Add => {
-            let bytes = path::add(path_arg.as_path());
-            let stdout = std::io::stdout();
-            let mut handle = stdout.lock();
-            handle.write_all(&bytes)?;
-            handle.flush()?;
+            let mut path_var = elements_from_path_var();
+            path_var.add(&folder);
+            path_var
         }
-        Command::Insert => panic!("TODO"),
+        Command::Insert => {
+            let mut path_var = elements_from_path_var();
+            path_var.insert(&folder);
+            path_var
+        }
         Command::Usage => usage(),
-    }
+    };
+
+    let stdout = std::io::stdout();
+    let mut handle = stdout.lock();
+    handle.write_all(&path_var.to_bytes())?;
+    handle.flush()?;
 
     Ok(())
 }
@@ -46,7 +58,19 @@ fn parse_command(command: &str) -> Command {
     }
 }
 
+fn elements_from_path_var() -> PathVar {
+    let path_var = match std::env::var_os("PATH") {
+        Some(path_var) => path_var,
+        None => OsString::from(""),
+    };
+    let elements = split_path_var(&path_var);
+    PathVar::new(elements)
+}
+
 fn usage() -> ! {
-    eprintln!("usage error: pathvar add <FOLDER>");
+    let usage_error = r#"usage error:
+    pathvar add <FOLDER>
+    pathvar insert <FOLDER>"#;
+    eprintln!("{}", usage_error);
     exit(1)
 }

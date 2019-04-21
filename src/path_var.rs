@@ -10,7 +10,19 @@ impl PathVar {
         Self { elements }
     }
 
-    pub fn contains(&self, element: &Path) -> bool {
+    pub fn add(&mut self, folder: &Path) {
+        if !self.contains(folder) {
+            self.append(folder)
+        }
+    }
+
+    pub fn insert(&mut self, folder: &Path) {
+        if !self.contains(folder) {
+            self.elements.insert(0, folder.to_path_buf());
+        }
+    }
+
+    fn contains(&self, element: &Path) -> bool {
         for path_buf in &self.elements {
             if path_buf.as_path() == element {
                 return true;
@@ -19,7 +31,7 @@ impl PathVar {
         false
     }
 
-    pub fn append(&mut self, element: &Path) {
+    fn append(&mut self, element: &Path) {
         self.elements.push(element.to_path_buf());
     }
 
