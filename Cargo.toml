@@ -1,7 +1,10 @@
 [package]
 name = "pathvar"
-version = "0.0.0"
+version = "0.0.1"
 edition = "2018"
 authors = [ "Michael Bolin <bolinfest@gmail.com>" ]
-description = ""
+description = "Binary that facilitates idempotent modifications to your PATH."
 license = "MIT"
+repository = "https://github.com/bolinfest/pathvar-rs"
+readme = "README.md"
+include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
